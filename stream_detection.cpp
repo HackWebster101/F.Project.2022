@@ -95,10 +95,16 @@ void syncCb(const sensor_msgs::ImageConstPtr& img, const object_msgs::ObjectsInB
   int width = img->width;
   int height = img->height;
 
+   // Draw header
+  std::stringstream header_ss;
+  header_ss << "F.Project 2022 - Live Object Detection Stream";
+  drawTextWithShadow(cvImage, header_ss.str(), cv::Point(LINESPACING, LINESPACING), 
+                    cv::Scalar(255, 255, 255), TEXT_FONT, TEXT_SCALE + 0.3, TEXT_THICKNESS + 1);
+
   for (auto obj : objs_in_boxes->objects_vector)
   {
     std::stringstream ss;
-    ss << obj.object.object_name << ": " << obj.object.probability * 100 << '%';
+    ss << obj.object.object_name << ": " << std::fixed << std::setprecision(1) << obj.object.probability * 100 << '%';
 
     int xmin = obj.roi.x_offset;
     int ymin = obj.roi.y_offset;
