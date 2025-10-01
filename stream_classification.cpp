@@ -109,19 +109,15 @@ void syncCb(const sensor_msgs::ImageConstPtr& img, const object_msgs::Objects::C
                       textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
   }
 
-  if (parallel_flag == 0)
+   if (parallel_flag == 0)
   {
-    cv::putText(cvImage, ss.str(), cvPoint(LINESPACING, LINESPACING * (++cnt)), cv::FONT_HERSHEY_SIMPLEX, 1,
-                cv::Scalar(0, 255, 0));
-    cv::imshow("image classification with single device", cvImage);
+    cv::imshow("F.Project 2022 - Live Classification (Single Device)", cvImage);
   }
   else
   {
-    cv::putText(cvImage, ss.str(), cvPoint(LINESPACING, LINESPACING * (++cnt)), cv::FONT_HERSHEY_SIMPLEX, 1,
-                cv::Scalar(0, 255, 0));
-    cv::namedWindow("image classification with multiple devices");
-    cv::moveWindow("image classification with multiple devices", MOVEWINDOW, 0);
-    cv::imshow("image classification with multiple devices", cvImage);
+    cv::namedWindow("F.Project 2022 - Live Classification (Multiple Devices)");
+    cv::moveWindow("F.Project 2022 - Live Classification (Multiple Devices)", MOVEWINDOW, 0);
+    cv::imshow("F.Project 2022 - Live Classification (Multiple Devices)", cvImage);
   }
 
   int key = cv::waitKey(5);
