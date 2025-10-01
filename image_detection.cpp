@@ -262,23 +262,85 @@ int main(int argc, char** argv)
 
           cv::Point left_top = cv::Point(xmin, ymin);
           cv::Point right_bottom = cv::Point(xmax, ymax);
-          cv::rectangle(cv_image.image, left_top, right_bottom, cv::Scalar(0, 255, 0), 1, cv::LINE_8, 0);
-          cv::rectangle(cv_image.image, cvPoint(xmin, ymin), cvPoint(xmax, ymin + 20), cv::Scalar(0, 255, 0), -1);
+          
+      cv::imshow("F.Project 2022 - Object Detection", cv_image.image);
+      cv::waitKey(0);
+    }
+    ROS_INFO("inference %lu images during %ld ms", srv.response.objects.size(), msdiff.total_milliseconds());
+  }
+  else
+  {
+    while (1)
+    {
+      object_msgs::DetectObject srv;
+      std::vector<int> random_index_list;
+      for (int i = 0; i < parallel_size; i++)
+      {
+        std::random_device rd;
+        std::default_random_engine engine(rd());
+        std::uniform_int_distribution<> dis(0, image_paths.size() - 1);
+        auto dice = std::bind(dis, engine);
+        int random_index = dice();
+        random_index_list.push_back(random_index);
+        srv.request.image_paths.push_back(image_paths[random_index]);
+      }
 
-          cv::putText(cv_image.image, ss.str(), cvPoint(xmin + 5, ymin + 20), cv::FONT_HERSHEY_PLAIN, 1,
-                      cv::Scalar(0, 0, 255), 1);
+      if (!client.call(srv))
+      {
+        ROS_ERROR("failed to call service DetectObject");
+        exit(1);
+      }
+
+      for (unsigned int i = 0; i < srv.response.objects.size(); i++)
+      {
+        cv_bridge::CvImage cv_image;
+        cv_image.image = cv::imread(image_paths[random_index_list[i]]);
+        cv_image.encoding = "bgr8";
+        int width = cv_image.image.cols;
+        int height = cv_image.image.rows;
+
+        // Draw header
+        std::stringstream header_ss;
+        header_ss << "Real-time Object Detection Results";
+        drawTextWithShadow(cv_image.image, header_ss.str(), cv::Point(20, 30), 
+                          cv::Scalar(255, 255, 255), TEXT_FONT, TEXT_SCALE + 0.3, TEXT_THICKNESS + 1);
+        
+        for (unsigned int j = 0; j < srv.response.objects[i].objects_vector.size(); j++)
+        {
+          std::stringstream ss;
+          ss << srv.response.objects[i].objects_vector[j].object.object_name << ": "
+             << std::fixed << std::setprecision(1) << srv.response.objects[i].objects_vector[j].object.probability * 100 << "%";
+
+          int xmin = srv.response.objects[i].objects_vector[j].roi.x_offset;
+          int ymin = srv.response.objects[i].objects_vector[j].roi.y_offset;
+          int w = srv.response.objects[i].objects_vector[j].roi.width;
+          int h = srv.response.objects[i].objects_vector[j].roi.height;
+
+          int xmax = ((xmin + w) < width) ? (xmin + w) : width;
+          int ymax = ((ymin + h) < height) ? (ymin + h) : height;
+
+          cv::Point left_top = cv::Point(xmin, ymin);
+          cv::Point right_bottom = cv::Point(xmax, ymax);
+          
+          // Get confidence-based colors
+          cv::Scalar boxColor = getConfidenceColor(srv.response.objects[i].objects_vector[j].object.probability);
+          cv::Scalar textColor = cv::Scalar(255, 255, 255); // White text for better contrast
+          
+          // Draw enhanced detection box
+          drawDetectionBox(cv_image.image, ss.str(), left_top, right_bottom, 
+                          boxColor, textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
         }
 
         if (parallel_flag == 0)
         {
-          cv::imshow("image detection with single device", cv_image.image);
+          cv::imshow("F.Project 2022 - Real-time Detection (Single Device)", cv_image.image);
           cv::waitKey(1);
         }
         else
         {
-          cv::namedWindow("image detection with multiple devices");
-          cv::moveWindow("image detection with multiple devices", MOVEWINDOW, 0);
-          cv::imshow("image detection with multiple devices", cv_image.image);
+          cv::namedWindow("F.Project 2022 - Real-time Detection (Multiple Devices)");
+          cv::moveWindow("F.Project 2022 - Real-time Detection (Multiple Devices)", MOVEWINDOW, 0);
+          cv::imshow("F.Project 2022 - Real-time Detection (Multiple Devices)", cv_image.image);
           cv::waitKey(1);
         }
       }
