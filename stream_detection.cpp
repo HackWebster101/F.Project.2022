@@ -116,6 +116,15 @@ void syncCb(const sensor_msgs::ImageConstPtr& img, const object_msgs::ObjectsInB
 
     cv::Point left_top = cv::Point(xmin, ymin);
     cv::Point right_bottom = cv::Point(xmax, ymax);
+    
+    // Get confidence-based colors
+    cv::Scalar boxColor = getConfidenceColor(obj.object.probability);
+    cv::Scalar textColor = cv::Scalar(255, 255, 255); // White text for better contrast
+    
+    // Draw enhanced detection box
+    drawDetectionBox(cvImage, ss.str(), left_top, right_bottom, 
+                    boxColor, textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
+  }
     cv::rectangle(cvImage, left_top, right_bottom, cv::Scalar(0, 255, 0), 1, cv::LINE_8, 0);
     cv::rectangle(cvImage, cvPoint(xmin, ymin), cvPoint(xmax, ymin + 20), cv::Scalar(0, 255, 0), -1);
     cv::putText(cvImage, ss.str(), cvPoint(xmin + 5, ymin + 20), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
