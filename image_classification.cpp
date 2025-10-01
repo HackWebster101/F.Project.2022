@@ -218,23 +218,25 @@ int main(int argc, char** argv)
         {
           std::stringstream ss;
           ss << srv.response.objects[i].objects_vector[j].object_name << ": "
-             << srv.response.objects[i].objects_vector[j].probability * 100 << "%";
+             << std::fixed << std::setprecision(1) << srv.response.objects[i].objects_vector[j].probability * 100 << "%";
 
-          cv::putText(cv_image.image, ss.str(), cvPoint(LINESPACING, LINESPACING * (++cnt)), cv::FONT_HERSHEY_SIMPLEX,
-                      0.5, cv::Scalar(0, 255, 0), 1);
+          // Get confidence-based color
+          cv::Scalar textColor = getConfidenceColor(srv.response.objects[i].objects_vector[j].probability);
+          
+          // Draw text with shadow for better visibility
+          drawTextWithShadow(cv_image.image, ss.str(), cv::Point(LINESPACING, LINESPACING * (++cnt + 1)), 
+                            textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
         }
 
         if (parallel_flag == 0)
         {
-          cv::imshow("image classification with single device", cv_image.image);
-          cv::waitKey(20);
+          cv::imshow("F.Project 2022 - Real-time Classification (Single Device)", cv_image.image);
         }
         else
         {
-          cv::namedWindow("image classification with multiple devices");
-          cv::moveWindow("image classification with multiple devices", MOVEWINDOW, 0);
-          cv::imshow("image classification with multiple devices", cv_image.image);
-          cv::waitKey(20);
+          cv::namedWindow("F.Project 2022 - Real-time Classification (Multiple Devices)");
+          cv::moveWindow("F.Project 2022 - Real-time Classification (Multiple Devices)", MOVEWINDOW, 0);
+          cv::imshow("F.Project 2022 - Real-time Classification (Multiple Devices)", cv_image.image);
         }
       }
     }
