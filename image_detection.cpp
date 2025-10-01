@@ -177,10 +177,10 @@ int main(int argc, char** argv)
                         cv::Scalar(255, 255, 255), TEXT_FONT, TEXT_SCALE + 0.3, TEXT_THICKNESS + 1);
       
       for (unsigned int j = 0; j < srv.response.objects[i].objects_vector.size(); j++)
-      {
+      { 
         std::stringstream ss;
         ss << srv.response.objects[i].objects_vector[j].object.object_name << ": "
-           << srv.response.objects[i].objects_vector[j].object.probability * 100 << "%";
+           << std::fixed << std::setprecision(1) << srv.response.objects[i].objects_vector[j].object.probability * 100 << "%";
 
         ROS_INFO("%d: object: %s", j, srv.response.objects[i].objects_vector[j].object.object_name.c_str());
         ROS_INFO("prob: %f", srv.response.objects[i].objects_vector[j].object.probability);
@@ -199,11 +199,16 @@ int main(int argc, char** argv)
 
         cv::Point left_top = cv::Point(xmin, ymin);
         cv::Point right_bottom = cv::Point(xmax, ymax);
-        cv::rectangle(cv_image.image, left_top, right_bottom, cv::Scalar(0, 255, 0), 1, cv::LINE_8, 0);
-        cv::rectangle(cv_image.image, cvPoint(xmin, ymin), cvPoint(xmax, ymin + 20), cv::Scalar(0, 255, 0), -1);
-        cv::putText(cv_image.image, ss.str(), cvPoint(xmin + 5, ymin + 20), cv::FONT_HERSHEY_PLAIN, 1,
-                    cv::Scalar(0, 0, 255), 1);
+        
+        // Get confidence-based colors
+        cv::Scalar boxColor = getConfidenceColor(srv.response.objects[i].objects_vector[j].object.probability);
+        cv::Scalar textColor = cv::Scalar(255, 255, 255); // White text for better contrast
+        
+        // Draw enhanced detection box
+        drawDetectionBox(cv_image.image, ss.str(), left_top, right_bottom, 
+                        boxColor, textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
       }
+
 
       cv::imshow("image_detection", cv_image.image);
       cv::waitKey(0);
