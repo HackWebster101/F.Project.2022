@@ -15,6 +15,7 @@
  */
 
 #include <dirent.h>
+#include <iomanip>
 #include <random>
 #include <string>
 #include <vector>
@@ -32,7 +33,6 @@
 #define DEFAULT_IMAGE_BASE_PATH "/opt/movidius/ncappzoo/data/images/"
 #define DEFAULT_DEMO_MODE 0
 #define DEFAULT_PARALLEL_FLAG 1
-
 
 // UI Enhancement constants
 #define TEXT_FONT cv::FONT_HERSHEY_SIMPLEX
@@ -166,20 +166,31 @@ int main(int argc, char** argv)
       int cnt = 0;
 
       ROS_INFO("Classification result for image No.%u:", i + 1);
+      
+      // Draw header
+      std::stringstream header_ss;
+      header_ss << "Image " << (i + 1) << " Classification Results";
+      drawTextWithBackground(cv_image.image, header_ss.str(), cv::Point(LINESPACING, LINESPACING), 
+                            cv::Scalar(255, 255, 255), cv::Scalar(50, 50, 50), TEXT_FONT, TEXT_SCALE + 0.2, TEXT_THICKNESS);
+      
       for (unsigned int j = 0; j < srv.response.objects[i].objects_vector.size(); j++)
       {
         std::stringstream ss;
         ss << srv.response.objects[i].objects_vector[j].object_name << ": "
-           << srv.response.objects[i].objects_vector[j].probability * 100 << "%";
+           << std::fixed << std::setprecision(1) << srv.response.objects[i].objects_vector[j].probability * 100 << "%";
 
         ROS_INFO("%d: object: %s\nprobability: %lf%%", j, srv.response.objects[i].objects_vector[j].object_name.c_str(),
                  srv.response.objects[i].objects_vector[j].probability * 100);
 
-        cv::putText(cv_image.image, ss.str(), cvPoint(LINESPACING, LINESPACING * (++cnt)), cv::FONT_HERSHEY_SIMPLEX,
-                    0.5, cv::Scalar(0, 255, 0), 1);
+        // Get confidence-based color
+        cv::Scalar textColor = getConfidenceColor(srv.response.objects[i].objects_vector[j].probability);
+        
+        // Draw text with shadow for better visibility
+        drawTextWithShadow(cv_image.image, ss.str(), cv::Point(LINESPACING, LINESPACING * (++cnt + 1)), 
+                          textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
       }
 
-      cv::imshow("image_classification", cv_image.image);
+      cv::imshow("F.Project 2022 - Image Classification", cv_image.image);
       cv::waitKey(0);
     }
     ROS_INFO("inference %lu images during %ld ms", srv.response.objects.size(), msdiff.total_milliseconds());
@@ -214,6 +225,12 @@ int main(int argc, char** argv)
         cv_image.encoding = "bgr8";
         int cnt = 0;
 
+        // Draw header
+        std::stringstream header_ss;
+        header_ss << "Real-time Classification Results";
+        drawTextWithBackground(cv_image.image, header_ss.str(), cv::Point(LINESPACING, LINESPACING), 
+                              cv::Scalar(255, 255, 255), cv::Scalar(50, 50, 50), TEXT_FONT, TEXT_SCALE + 0.2, TEXT_THICKNESS);
+        
         for (unsigned int j = 0; j < srv.response.objects[i].objects_vector.size(); j++)
         {
           std::stringstream ss;
@@ -231,12 +248,14 @@ int main(int argc, char** argv)
         if (parallel_flag == 0)
         {
           cv::imshow("F.Project 2022 - Real-time Classification (Single Device)", cv_image.image);
+          cv::waitKey(20);
         }
         else
         {
           cv::namedWindow("F.Project 2022 - Real-time Classification (Multiple Devices)");
           cv::moveWindow("F.Project 2022 - Real-time Classification (Multiple Devices)", MOVEWINDOW, 0);
           cv::imshow("F.Project 2022 - Real-time Classification (Multiple Devices)", cv_image.image);
+          cv::waitKey(20);
         }
       }
     }
