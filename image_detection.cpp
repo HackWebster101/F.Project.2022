@@ -170,6 +170,12 @@ int main(int argc, char** argv)
       int height = cv_image.image.rows;
 
       ROS_INFO("Detection result for image No.%u:", i + 1);
+      // Draw header
+      std::stringstream header_ss;
+      header_ss << "Image " << (i + 1) << " Object Detection Results";
+      drawTextWithShadow(cv_image.image, header_ss.str(), cv::Point(20, 30), 
+                        cv::Scalar(255, 255, 255), TEXT_FONT, TEXT_SCALE + 0.3, TEXT_THICKNESS + 1);
+      
       for (unsigned int j = 0; j < srv.response.objects[i].objects_vector.size(); j++)
       {
         std::stringstream ss;
