@@ -15,6 +15,7 @@
  */
 
 #include <cv_bridge/cv_bridge.h>
+#include <iomanip>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <object_msgs/Object.h>
@@ -25,6 +26,42 @@
 #define LINESPACING 50
 #define DEFAULT_PARALLEL_FLAG 1
 #define MOVEWINDOW 1000
+
+// UI Enhancement constants
+#define TEXT_FONT cv::FONT_HERSHEY_SIMPLEX
+#define TEXT_SCALE 0.8
+#define TEXT_THICKNESS 2
+#define SHADOW_OFFSET 2
+
+// UI Helper Functions
+cv::Scalar getConfidenceColor(double confidence) {
+  if (confidence >= 0.8) return cv::Scalar(0, 255, 0);      // Green for high confidence
+  else if (confidence >= 0.6) return cv::Scalar(0, 255, 255); // Yellow for medium confidence
+  else return cv::Scalar(0, 165, 255);                      // Orange for low confidence
+}
+
+void drawTextWithShadow(cv::Mat& image, const std::string& text, cv::Point position, 
+                       cv::Scalar color, int fontFace, double fontScale, int thickness) {
+  // Draw shadow
+  cv::putText(image, text, cv::Point(position.x + SHADOW_OFFSET, position.y + SHADOW_OFFSET), 
+              fontFace, fontScale, cv::Scalar(0, 0, 0), thickness + 1);
+  // Draw main text
+  cv::putText(image, text, position, fontFace, fontScale, color, thickness);
+}
+
+void drawTextWithBackground(cv::Mat& image, const std::string& text, cv::Point position, 
+                           cv::Scalar textColor, cv::Scalar bgColor, int fontFace, double fontScale, int thickness) {
+  int baseline = 0;
+  cv::Size textSize = cv::getTextSize(text, fontFace, fontScale, thickness, &baseline);
+  
+  // Draw background rectangle
+  cv::Point bgTopLeft(position.x - 5, position.y - textSize.height - 5);
+  cv::Point bgBottomRight(position.x + textSize.width + 5, position.y + baseline + 5);
+  cv::rectangle(image, bgTopLeft, bgBottomRight, bgColor, -1);
+  
+  // Draw text
+  cv::putText(image, text, position, fontFace, fontScale, textColor, thickness);
+}
 
 int getFPS()
 {
