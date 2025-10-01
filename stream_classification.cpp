@@ -90,17 +90,24 @@ void syncCb(const sensor_msgs::ImageConstPtr& img, const object_msgs::Objects::C
   cv::Mat cvImage = cv_bridge::toCvShare(img, "bgr8")->image;
   int cnt = 0;
 
+ // Draw header
+  std::stringstream header_ss;
+  header_ss << "F.Project 2022 - Live Classification Stream";
+  drawTextWithBackground(cvImage, header_ss.str(), cv::Point(LINESPACING, LINESPACING), 
+                        cv::Scalar(255, 255, 255), cv::Scalar(50, 50, 50), TEXT_FONT, TEXT_SCALE + 0.2, TEXT_THICKNESS);
+
   for (auto obj : objs->objects_vector)
   {
     std::stringstream ss;
-    ss << obj.object_name << ": " << obj.probability * 100 << '%';
-    cv::putText(cvImage, ss.str(), cvPoint(LINESPACING, LINESPACING * (++cnt)), cv::FONT_HERSHEY_SIMPLEX, 1,
-                cv::Scalar(0, 255, 0));
+    ss << obj.object_name << ": " << std::fixed << std::setprecision(1) << obj.probability * 100 << '%';
+    
+    // Get confidence-based color
+    cv::Scalar textColor = getConfidenceColor(obj.probability);
+    
+    // Draw text with shadow for better visibility
+    drawTextWithShadow(cvImage, ss.str(), cv::Point(LINESPACING, LINESPACING * (++cnt + 1)), 
+                      textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
   }
-
-  std::stringstream ss;
-  int fps = getFPS();
-  ss << "FPS: " << fps;
 
   if (parallel_flag == 0)
   {
