@@ -95,7 +95,7 @@ void syncCb(const sensor_msgs::ImageConstPtr& img, const object_msgs::ObjectsInB
   int width = img->width;
   int height = img->height;
 
-   // Draw header
+  // Draw header
   std::stringstream header_ss;
   header_ss << "F.Project 2022 - Live Object Detection Stream";
   drawTextWithShadow(cvImage, header_ss.str(), cv::Point(LINESPACING, LINESPACING), 
@@ -125,26 +125,29 @@ void syncCb(const sensor_msgs::ImageConstPtr& img, const object_msgs::ObjectsInB
     drawDetectionBox(cvImage, ss.str(), left_top, right_bottom, 
                     boxColor, textColor, TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
   }
-    cv::rectangle(cvImage, left_top, right_bottom, cv::Scalar(0, 255, 0), 1, cv::LINE_8, 0);
-    cv::rectangle(cvImage, cvPoint(xmin, ymin), cvPoint(xmax, ymin + 20), cv::Scalar(0, 255, 0), -1);
-    cv::putText(cvImage, ss.str(), cvPoint(xmin + 5, ymin + 20), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
-  }
 
-  std::stringstream ss;
+  // Draw FPS with background
+  std::stringstream fps_ss;
   int fps = getFPS();
-  ss << "FPS: " << fps;
+  fps_ss << "FPS: " << fps;
+  drawTextWithShadow(cvImage, fps_ss.str(), cv::Point(LINESPACING, LINESPACING + 30), 
+                    cv::Scalar(0, 255, 0), TEXT_FONT, TEXT_SCALE, TEXT_THICKNESS);
+
+  // Draw help text
+  std::stringstream help_ss;
+  help_ss << "Press ESC, Enter, Space, or 'q' to exit";
+  drawTextWithShadow(cvImage, help_ss.str(), cv::Point(LINESPACING, cvImage.rows - 30), 
+                    cv::Scalar(200, 200, 200), TEXT_FONT, TEXT_SCALE - 0.2, TEXT_THICKNESS - 1);
 
   if (parallel_flag == 0)
   {
-    cv::putText(cvImage, ss.str(), cvPoint(LINESPACING, LINESPACING), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 0));
-    cv::imshow("stream detection with single device", cvImage);
+    cv::imshow("F.Project 2022 - Live Detection (Single Device)", cvImage);
   }
   else
   {
-    cv::putText(cvImage, ss.str(), cvPoint(LINESPACING, LINESPACING), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 0));
-    cv::namedWindow("image detection with multiple devices");
-    cv::moveWindow("image detection with multiple devices", MOVEWINDOW, 0);
-    cv::imshow("image detection with multiple devices", cvImage);
+    cv::namedWindow("F.Project 2022 - Live Detection (Multiple Devices)");
+    cv::moveWindow("F.Project 2022 - Live Detection (Multiple Devices)", MOVEWINDOW, 0);
+    cv::imshow("F.Project 2022 - Live Detection (Multiple Devices)", cvImage);
   }
 
   int key = cv::waitKey(5);
