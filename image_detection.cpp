@@ -15,6 +15,7 @@
  */
 
 #include <dirent.h>
+#include <iomanip>
 #include <random>
 #include <string>
 #include <vector>
@@ -31,6 +32,47 @@
 #define DEFAULT_IMAGE_BASE_PATH "/opt/movidius/ncappzoo/data/images/"
 #define DEFAULT_DEMO_MODE 0
 #define DEFAULT_PARALLEL_FLAG 1
+
+
+// UI Enhancement constants
+#define TEXT_FONT cv::FONT_HERSHEY_SIMPLEX
+#define TEXT_SCALE 0.6
+#define TEXT_THICKNESS 2
+#define BOX_THICKNESS 3
+#define SHADOW_OFFSET 2
+
+// UI Helper Functions
+cv::Scalar getConfidenceColor(double confidence) {
+  if (confidence >= 0.8) return cv::Scalar(0, 255, 0);      // Green for high confidence
+  else if (confidence >= 0.6) return cv::Scalar(0, 255, 255); // Yellow for medium confidence
+  else return cv::Scalar(0, 165, 255);                      // Orange for low confidence
+}
+
+void drawTextWithShadow(cv::Mat& image, const std::string& text, cv::Point position, 
+                       cv::Scalar color, int fontFace, double fontScale, int thickness) {
+  // Draw shadow
+  cv::putText(image, text, cv::Point(position.x + SHADOW_OFFSET, position.y + SHADOW_OFFSET), 
+              fontFace, fontScale, cv::Scalar(0, 0, 0), thickness + 1);
+  // Draw main text
+  cv::putText(image, text, position, fontFace, fontScale, color, thickness);
+}
+
+void drawDetectionBox(cv::Mat& image, const std::string& label, cv::Point topLeft, cv::Point bottomRight, 
+                     cv::Scalar boxColor, cv::Scalar textColor, int fontFace, double fontScale, int thickness) {
+  // Draw main bounding box
+  cv::rectangle(image, topLeft, bottomRight, boxColor, BOX_THICKNESS, cv::LINE_8, 0);
+  
+  // Draw label background
+  int baseline = 0;
+  cv::Size textSize = cv::getTextSize(label, fontFace, fontScale, thickness, &baseline);
+  cv::Point labelTopLeft(topLeft.x, topLeft.y - textSize.height - 5);
+  cv::Point labelBottomRight(topLeft.x + textSize.width + 10, topLeft.y);
+  cv::rectangle(image, labelTopLeft, labelBottomRight, boxColor, -1);
+  
+  // Draw label text with shadow
+  drawTextWithShadow(image, label, cv::Point(topLeft.x + 5, topLeft.y - 5), 
+                    textColor, fontFace, fontScale, thickness);
+}
 
 std::vector<std::string> getImagePath(std::string image_dir)
 {
