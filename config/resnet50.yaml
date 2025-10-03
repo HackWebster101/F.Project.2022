@@ -1,0 +1,34 @@
+# ResNet-50 Configuration
+model:
+  name: "resnet50"
+  type: "classification"
+  description: "ResNet-50 for image classification"
+
+network:
+  graph_file_path: "../data/models/resnet50.graph"
+  category_file_path: "../data/labels/imagenet1000.txt"
+  network_dimension: 224
+  mean: [123.675, 116.28, 103.53]
+  scale: 58.395
+  top_n: 5
+
+device:
+  device_index: 0
+  log_level: "INFO"
+  enable_profiling: false
+  max_inferences: 1000
+  thermal_monitoring: "enabled"
+
+preprocessing:
+  resize_method: "bilinear"
+  color_space: "RGB"
+  normalization: "caffe"
+
+postprocessing:
+  softmax_temperature: 1.0
+  top_k_filtering: true
+
+performance:
+  target_fps: 30
+  latency_budget_ms: 100
+  memory_limit_mb: 512
