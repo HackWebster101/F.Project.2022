@@ -1,0 +1,102 @@
+# Movidius NCS Project Configuration
+project:
+  name: "movidius_ncs_project"
+  version: "2.0.0"
+  description: "Intel Movidius Neural Compute Stick ROS Package"
+
+build:
+  cmake_version: "3.0.2"
+  build_type: "Release"
+  cxx_standard: 14
+  compiler_flags:
+    - "-Wall"
+    - "-Wextra"
+    - "-O3"
+    - "-DNDEBUG"
+
+dependencies:
+  required:
+    - "roscpp"
+    - "sensor_msgs"
+    - "cv_bridge"
+    - "image_transport"
+    - "OpenCV"
+    - "Boost"
+
+  optional:
+    - "CUDA"
+    - "OpenCL"
+    - "TensorRT"
+
+models:
+  available:
+    - "alexnet"
+    - "googlenet"
+    - "inception_v1"
+    - "inception_v2"
+    - "inception_v3"
+    - "inception_v4"
+    - "mobilenet"
+    - "mobilenetssd"
+    - "resnet50"
+    - "densenet121"
+    - "squeezenet"
+    - "tinyyolo_v1"
+    - "yolov3"
+    - "facenet"
+
+  default_model: "mobilenetssd"
+
+device:
+  default_device_index: 0
+  max_devices: 8
+  auto_detect: true
+  fallback_strategy: "round_robin"
+
+logging:
+  level: "INFO"
+  file_path: "../logs/ncs_project.log"
+  max_file_size: "10MB"
+  rotation_count: 5
+
+performance:
+  enable_monitoring: true
+  monitoring_interval: 60  # seconds
+  enable_profiling: false
+  benchmark_mode: false
+
+ros:
+  namespace: "/ncs"
+  queue_size: 10
+  subscriber_threads: 4
+  publisher_threads: 4
+
+examples:
+  available:
+    - "image_classification"
+    - "image_detection"
+    - "stream_classification"
+    - "stream_detection"
+    - "batch_processing"
+    - "multi_camera"
+    - "performance_benchmark"
+    - "calibration"
+
+  default_example: "image_classification"
+
+data:
+  images_path: "../data/images/"
+  models_path: "../data/models/"
+  labels_path: "../data/labels/"
+  results_path: "../data/results/"
+
+docker:
+  base_image: "ros:melodic-ros-core"
+  maintainer: "Intel Corporation"
+  tag: "movidius-ncs:latest"
+
+ci:
+  enabled: false
+  platform: "github_actions"
+  test_script: "catkin_make run_tests"
+  build_script: "catkin_make"
