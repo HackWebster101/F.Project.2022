@@ -1,0 +1,41 @@
+# YOLOv3 Configuration
+model:
+  name: "yolov3"
+  type: "detection"
+  description: "YOLOv3 for object detection"
+
+network:
+  graph_file_path: "../data/models/yolov3.graph"
+  category_file_path: "../data/labels/coco.txt"
+  network_dimension: 416
+  mean: [0.0, 0.0, 0.0]
+  scale: 255.0
+  top_n: 20
+
+device:
+  device_index: 0
+  log_level: "INFO"
+  enable_profiling: false
+  max_inferences: 1000
+  thermal_monitoring: "enabled"
+
+preprocessing:
+  resize_method: "bilinear"
+  color_space: "RGB"
+  normalization: "none"
+  letterboxing: true
+
+postprocessing:
+  confidence_threshold: 0.5
+  nms_threshold: 0.4
+  max_detections: 100
+
+anchors:
+  - [10, 13, 16, 30, 33, 23]
+  - [30, 61, 62, 45, 59, 119]
+  - [116, 90, 156, 198, 373, 326]
+
+performance:
+  target_fps: 15
+  latency_budget_ms: 200
+  memory_limit_mb: 1024
