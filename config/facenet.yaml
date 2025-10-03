@@ -1,0 +1,37 @@
+# FaceNet Configuration
+model:
+  name: "facenet"
+  type: "embedding"
+  description: "FaceNet for face recognition and embedding"
+
+network:
+  graph_file_path: "../data/models/facenet.graph"
+  category_file_path: ""  # No category file for embeddings
+  network_dimension: 160
+  mean: [127.5, 127.5, 127.5]
+  scale: 127.5
+  top_n: 1
+
+device:
+  device_index: 0
+  log_level: "INFO"
+  enable_profiling: true
+  max_inferences: 1000
+  thermal_monitoring: "enabled"
+
+preprocessing:
+  resize_method: "bilinear"
+  color_space: "RGB"
+  normalization: "caffe"
+  face_detection: true
+  landmark_detection: true
+
+postprocessing:
+  embedding_dimension: 128
+  similarity_threshold: 0.6
+  distance_metric: "euclidean"
+
+performance:
+  target_fps: 20
+  latency_budget_ms: 100
+  memory_limit_mb: 256

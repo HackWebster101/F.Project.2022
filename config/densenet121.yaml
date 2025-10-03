@@ -1,0 +1,34 @@
+# DenseNet-121 Configuration
+model:
+  name: "densenet121"
+  type: "classification"
+  description: "DenseNet-121 for image classification"
+
+network:
+  graph_file_path: "../data/models/densenet121.graph"
+  category_file_path: "../data/labels/imagenet1000.txt"
+  network_dimension: 224
+  mean: [123.675, 116.28, 103.53]
+  scale: 58.395
+  top_n: 5
+
+device:
+  device_index: 0
+  log_level: "INFO"
+  enable_profiling: false
+  max_inferences: 1000
+  thermal_monitoring: "enabled"
+
+preprocessing:
+  resize_method: "bilinear"
+  color_space: "RGB"
+  normalization: "caffe"
+
+postprocessing:
+  softmax_temperature: 1.0
+  top_k_filtering: true
+
+performance:
+  target_fps: 25
+  latency_budget_ms: 150
+  memory_limit_mb: 512
